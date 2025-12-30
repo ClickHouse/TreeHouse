@@ -24,13 +24,13 @@ To ensure we didn't take any shortcuts, we imposed three strict rules on our sol
 
 **Implementation details:**
 
-1. [**`sum() OVER (...)`](https://clickhouse.com/docs/en/sql-reference/window-functions)**: We used standard SQL window functions to maintain the "running total" of the dial's position. By normalizing the left/right directions into positive/negative values, we tracked the cumulative position for every row in a single pass.
+1. **[`sum() OVER (...)`](https://clickhouse.com/docs/en/sql-reference/window-functions)**: We used standard SQL window functions to maintain the "running total" of the dial's position. By normalizing the left/right directions into positive/negative values, we tracked the cumulative position for every row in a single pass.
 
 ```sql
 sum(normalized_steps) OVER (ORDER BY instruction_id) AS raw_position
 ```
 
-2. [**`lagInFrame`](https://clickhouse.com/docs/en/sql-reference/window-functions)**: To count how many times we passed zero, we needed to know where the dial *started* before the current rotation. We used `lagInFrame` to peek at the `position` from the previous row. This allowed us to compare the start and end points of a rotation and mathematically determine if `0` fell between them.
+2. **[`lagInFrame`](https://clickhouse.com/docs/en/sql-reference/window-functions)**: To count how many times we passed zero, we needed to know where the dial *started* before the current rotation. We used `lagInFrame` to peek at the `position` from the previous row. This allowed us to compare the start and end points of a rotation and mathematically determine if `0` fell between them.
 
 [View full puzzle description](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_1_puzzle.txt) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_1.sql)
 
@@ -47,13 +47,13 @@ sum(normalized_steps) OVER (ORDER BY instruction_id) AS raw_position
 
 **Implementation details:**
 
-1. [**`arrayJoin`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arrayjoin)**: This function is our staple for generating rows. We used `range(start, end)` to create an array of integers for each input line, and `arrayJoin` to explode that array into separate rows. This made filtering for invalid IDs a simple `WHERE` clause operation.
+1. **[`arrayJoin`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arrayjoin)**: This function is our staple for generating rows. We used `range(start, end)` to create an array of integers for each input line, and `arrayJoin` to explode that array into separate rows. This made filtering for invalid IDs a simple `WHERE` clause operation.
 
 ```sql
 SELECT arrayJoin(range(bounds[1], bounds[2] + 1)) AS number
 ```
 
-2. [**`arrayExists`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayexists)**: For Part 2, we had to check if *any* substring length (from 1 up to the string length) formed a repeating pattern. We used `arrayExists` with a lambda function to check every possible substring length. If the lambda returns 1 for any length, the ID is flagged.
+2. **[`arrayExists`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayexists)**: For Part 2, we had to check if *any* substring length (from 1 up to the string length) formed a repeating pattern. We used `arrayExists` with a lambda function to check every possible substring length. If the lambda returns 1 for any length, the ID is flagged.
 
 ```sql
 arrayExists(
@@ -77,7 +77,7 @@ arrayExists(
 
 **Implementation details:**
 
-1. [**`arrayFold`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayfold)**: We used this higher-order function to implement `reduce()`\-style logic. Our accumulator stored a tuple: `(digits_remaining, current_position, accumulated_value)`. For every step of the fold, we calculated the best valid digit to pick next and updated the state tuple accordingly.
+1. **[`arrayFold`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayfold)**: We used this higher-order function to implement `reduce()`\-style logic. Our accumulator stored a tuple: `(digits_remaining, current_position, accumulated_value)`. For every step of the fold, we calculated the best valid digit to pick next and updated the state tuple accordingly.
 
 ```sql
 arrayFold(
@@ -87,7 +87,7 @@ arrayFold(
 )
 ```
 
-2. [**`ngrams`](https://clickhouse.com/docs/en/sql-reference/functions/string-functions#ngrams)**: To process the string of digits as an array, we used `ngrams(string, 1)`. While typically used for text analysis, here it served as a convenient way to split a string into an array of single characters, which we then cast to integers for the `arrayFold` operation.
+2. **[`ngrams`](https://clickhouse.com/docs/en/sql-reference/functions/string-functions#ngrams)**: To process the string of digits as an array, we used `ngrams(string, 1)`. While typically used for text analysis, here it served as a convenient way to split a string into an array of single characters, which we then cast to integers for the `arrayFold` operation.
 
 [View full puzzle description](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_3_puzzle.txt) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_3.sql)
 
@@ -104,7 +104,7 @@ arrayFold(
 
 **Implementation details:**
 
-1. [**`WITH RECURSIVE`](https://clickhouse.com/docs/en/sql-reference/statements/select/with#recursive-cte)**: We used the standard SQL recursive CTE to handle the graph traversal. The base case selected all initial paper roll positions. The recursive step filtered that set down based on neighbor counts.
+1. **[`WITH RECURSIVE`](https://clickhouse.com/docs/en/sql-reference/statements/select/with#recursive-cte)**: We used the standard SQL recursive CTE to handle the graph traversal. The base case selected all initial paper roll positions. The recursive step filtered that set down based on neighbor counts.
 
 ```sql
 WITH RECURSIVE recursive_convergence AS (
@@ -115,7 +115,7 @@ WITH RECURSIVE recursive_convergence AS (
 )
 ```
 
-2. [**`argMin`](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference/argmin)**: To find the exact moment the simulation stabilized, we tracked the point count at every depth of the recursion. We used `argMin(point_count, depth)` to retrieve the count of remaining points exactly at the minimum depth where the count stopped changing.
+2. **[`argMin`](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference/argmin)**: To find the exact moment the simulation stabilized, we tracked the point count at every depth of the recursion. We used `argMin(point_count, depth)` to retrieve the count of remaining points exactly at the minimum depth where the count stopped changing.
 
 [View full puzzle description](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_4_puzzle.txt) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_4.sql)
 
@@ -132,13 +132,13 @@ WITH RECURSIVE recursive_convergence AS (
 
 **Implementation details:**
 
-1. [**`intervalLengthSum`](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference/intervallengthsum)**: We used this specialized aggregate function to calculate the total length of the union of intervals. It automatically handles overlapping and nested ranges, saving us from writing complex merging logic.
+1. **[`intervalLengthSum`](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference/intervallengthsum)**: We used this specialized aggregate function to calculate the total length of the union of intervals. It automatically handles overlapping and nested ranges, saving us from writing complex merging logic.
 
 ```sql
 SELECT intervalLengthSum(range_tuple.1, range_tuple.2) AS solution
 ```
 
-2. [**`arrayExists`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayexists)**: For Part 1, we used `arrayExists` to check if a specific ID fell within *any* of the valid ranges in the array. This allowed us to perform the check efficiently without exploding the ranges into billions of individual rows.
+2. **[`arrayExists`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayexists)**: For Part 1, we used `arrayExists` to check if a specific ID fell within *any* of the valid ranges in the array. This allowed us to perform the check efficiently without exploding the ranges into billions of individual rows.
 
 [View full puzzle description](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_5_puzzle.txt) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_5.sql)
 
@@ -155,9 +155,9 @@ SELECT intervalLengthSum(range_tuple.1, range_tuple.2) AS solution
 
 **Implementation details:**
 
-1. [**`splitByWhitespace`](https://clickhouse.com/docs/en/sql-reference/functions/string-functions#splitbywhitespace)**: In Part 1, we used this function to robustly parse the "horizontal" representation. It automatically handled the variable spacing between columns, which would have tripped up simple string splitting.  
+1. **[`splitByWhitespace`](https://clickhouse.com/docs/en/sql-reference/functions/string-functions#splitbywhitespace)**: In Part 1, we used this function to robustly parse the "horizontal" representation. It automatically handled the variable spacing between columns, which would have tripped up simple string splitting.  
      
-2. [**`arrayProduct`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arrayproduct)**: Since ClickHouse lacks a standard `product()` aggregate function, we mapped our columns to arrays of integers and used `arrayProduct` to calculate the multiplication results.
+2. **[`arrayProduct`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arrayproduct)**: Since ClickHouse lacks a standard `product()` aggregate function, we mapped our columns to arrays of integers and used `arrayProduct` to calculate the multiplication results.
 
 ```sql
 toInt64(arrayProduct(
@@ -165,7 +165,7 @@ toInt64(arrayProduct(
 ))
 ```
 
-3. [**`arraySplit`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraysplit)**: For Part 2, after extracting the raw digits, we needed to group them into valid expressions. We used `arraySplit` to break the large array into chunks whenever we encountered an operator column, effectively separating the mathematical problems.
+3. **[`arraySplit`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraysplit)**: For Part 2, after extracting the raw digits, we needed to group them into valid expressions. We used `arraySplit` to break the large array into chunks whenever we encountered an operator column, effectively separating the mathematical problems.
 
 [View full puzzle description](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_6_puzzle.txt) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_6.sql)
 
@@ -182,9 +182,9 @@ toInt64(arrayProduct(
 
 **Implementation details:**
 
-1. [**`arrayFold`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayfold)**: We used `arrayFold` to implement the row-by-row simulation state machine. We carried a complex state object—`(left_boundary, right_boundary, worlds_map, part1_counter)`—and updated it for each row of the grid.  
+1. **[`arrayFold`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayfold)**: We used `arrayFold` to implement the row-by-row simulation state machine. We carried a complex state object—`(left_boundary, right_boundary, worlds_map, part1_counter)`—and updated it for each row of the grid.  
      
-2. [**`sumMap`](https://clickhouse.com/docs/en/sql-reference/functions/map-functions)**: To handle beams merging (e.g., a left branch and a right branch meeting at the same spot), we used `sumMap`. This allowed us to aggregate values for identical keys in our world map, easily combining the counts of "timelines" converging on a single coordinate.
+2. **[`sumMap`](https://clickhouse.com/docs/en/sql-reference/functions/map-functions)**: To handle beams merging (e.g., a left branch and a right branch meeting at the same spot), we used `sumMap`. This allowed us to aggregate values for identical keys in our world map, easily combining the counts of "timelines" converging on a single coordinate.
 
 ```sql
 arrayReduce('sumMap', arrayMap(position -> map(...), ...))
@@ -205,9 +205,9 @@ arrayReduce('sumMap', arrayMap(position -> map(...), ...))
 
 **Implementation details:**
 
-1. [**`L2Distance`](https://clickhouse.com/docs/en/sql-reference/functions/distance-functions#l2distance)**: We used ClickHouse's native `L2Distance` function to efficiently calculate the Euclidean distance between 3D coordinates `[x, y, z]`, allowing us to sort the potential connections by length.  
+1. **[`L2Distance`](https://clickhouse.com/docs/en/sql-reference/functions/distance-functions#l2distance)**: We used ClickHouse's native `L2Distance` function to efficiently calculate the Euclidean distance between 3D coordinates `[x, y, z]`, allowing us to sort the potential connections by length.  
      
-2. [**`runningAccumulate`](https://clickhouse.com/docs/en/sql-reference/functions/other-functions#runningaccumulate)**: For Part 2, we needed to know when we had seen enough unique points to form a single circuit. Instead of running a slow `DISTINCT` count on every row, we used `uniqCombinedState` to create a compact sketch of unique elements, and `runningAccumulate` to merge these sketches row-by-row, providing a running count of unique points efficiently.
+2. **[`runningAccumulate`](https://clickhouse.com/docs/en/sql-reference/functions/other-functions#runningaccumulate)**: For Part 2, we needed to know when we had seen enough unique points to form a single circuit. Instead of running a slow `DISTINCT` count on every row, we used `uniqCombinedState` to create a compact sketch of unique elements, and `runningAccumulate` to merge these sketches row-by-row, providing a running count of unique points efficiently.
 
 ```sql
 runningAccumulate(points_state) AS unique_points_seen
@@ -228,9 +228,9 @@ runningAccumulate(points_state) AS unique_points_seen
 
 **Implementation details:**
 
-1. [**`polygonAreaCartesian`](https://clickhouse.com/docs/en/sql-reference/functions/geometry-functions#polygonareacartesian)**: We avoided manual width/height calculations by constructing polygon objects for our rectangles and using `polygonAreaCartesian` to compute their area directly.  
+1. **[`polygonAreaCartesian`](https://clickhouse.com/docs/en/sql-reference/functions/geometry-functions#polygonareacartesian)**: We avoided manual width/height calculations by constructing polygon objects for our rectangles and using `polygonAreaCartesian` to compute their area directly.  
      
-2. [**`polygonsWithinCartesian`](https://clickhouse.com/docs/en/sql-reference/functions/geometry-functions#polygonswithincartesian)**: To check if a rectangle fit inside the loop, we used this containment function. We applied a clever trick here: because geometric functions can be tricky about points shared exactly on an edge, we constructed a slightly **inset** version of the candidate rectangle (shrunk by 0.01 units). This ensured the containment check strictly validated that the rectangle fit *inside* the boundary polygon without edge alignment errors.
+2. **[`polygonsWithinCartesian`](https://clickhouse.com/docs/en/sql-reference/functions/geometry-functions#polygonswithincartesian)**: To check if a rectangle fit inside the loop, we used this containment function. We applied a clever trick here: because geometric functions can be tricky about points shared exactly on an edge, we constructed a slightly **inset** version of the candidate rectangle (shrunk by 0.01 units). This ensured the containment check strictly validated that the rectangle fit *inside* the boundary polygon without edge alignment errors.
 
 ```sql
 -- Create slightly inset test bounds (0.01 units inside)
@@ -253,9 +253,9 @@ polygonsWithinCartesian(test_bounds, all_points_ring)
 
 **Implementation details:**
 
-1. [**`bitTest`](https://clickhouse.com/docs/en/sql-reference/functions/bit-functions)** and [**`bitCount`](https://clickhouse.com/docs/en/sql-reference/functions/bit-functions)**: We treated button combinations as binary integers. `bitTest` allowed us to check if a specific button was pressed in a combination, and `bitCount` instantly gave us the total number of presses (the cost).  
+1. **[`bitTest`](https://clickhouse.com/docs/en/sql-reference/functions/bit-functions)** and **[`bitCount`](https://clickhouse.com/docs/en/sql-reference/functions/bit-functions)**: We treated button combinations as binary integers. `bitTest` allowed us to check if a specific button was pressed in a combination, and `bitCount` instantly gave us the total number of presses (the cost).  
      
-2. [**`ARRAY JOIN`](https://clickhouse.com/docs/en/sql-reference/statements/select/array-join)**: To generate the search space for Part 1, we created a range of integers (0 to `2^N`) and used `ARRAY JOIN` to explode them into rows. This instantly created a row for every possible permutation of button presses.
+2. **[`ARRAY JOIN`](https://clickhouse.com/docs/en/sql-reference/statements/select/array-join)**: To generate the search space for Part 1, we created a range of integers (0 to `2^N`) and used `ARRAY JOIN` to explode them into rows. This instantly created a row for every possible permutation of button presses.
 
 ```sql
 ARRAY JOIN range(0, toUInt32(pow(2, num_buttons)))
@@ -276,7 +276,7 @@ ARRAY JOIN range(0, toUInt32(pow(2, num_buttons)))
 
 **Implementation details:**
 
-1. [**`cityHash64`](https://clickhouse.com/docs/en/sql-reference/functions/hash-functions#cityhash64)**: String comparisons can be slow in large recursive joins. We converted the node names (like `svr`, `dac`) into deterministic 64-bit integers using `cityHash64`. This made the join operations significantly faster and reduced memory usage.
+1. **[`cityHash64`](https://clickhouse.com/docs/en/sql-reference/functions/hash-functions#cityhash64)**: String comparisons can be slow in large recursive joins. We converted the node names (like `svr`, `dac`) into deterministic 64-bit integers using `cityHash64`. This made the join operations significantly faster and reduced memory usage.
 
 ```sql
 cityHash64('svr') AS svr_node
@@ -300,9 +300,9 @@ paths.visited_dac OR (edges.to_node = kn.dac_node) AS visited_dac
 
 **Implementation details:**
 
-1. [**`replaceRegexpAll`](https://clickhouse.com/docs/en/sql-reference/functions/string-replace-functions#replaceregexpall)**: We used regex replacement to turn the visual `#` characters into `1` and `.` into `0`. This transformed the "art" into computable binary strings that we could parse into arrays.  
+1. **[`replaceRegexpAll`](https://clickhouse.com/docs/en/sql-reference/functions/string-replace-functions#replaceregexpall)**: We used regex replacement to turn the visual `#` characters into `1` and `.` into `0`. This transformed the "art" into computable binary strings that we could parse into arrays.  
      
-2. [**`arraySum`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraysum)**: We used the lambda version of `arraySum` to perform a "dot product" operation. We multiplied the volume of each present by its area and summed the results in a single, clean expression.
+2. **[`arraySum`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraysum)**: We used the lambda version of `arraySum` to perform a "dot product" operation. We multiplied the volume of each present by its area and summed the results in a single, clean expression.
 
 ```sql
 arraySum(
