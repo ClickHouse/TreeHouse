@@ -32,7 +32,7 @@ sum(normalized_steps) OVER (ORDER BY instruction_id) AS raw_position
 
 2. **[`lagInFrame`](https://clickhouse.com/docs/en/sql-reference/window-functions)**: To count how many times we passed zero, we needed to know where the dial *started* before the current rotation. We used `lagInFrame` to peek at the `position` from the previous row. This allowed us to compare the start and end points of a rotation and mathematically determine if `0` fell between them.
 
-[View full puzzle description](https://adventofcode.com/2025/day/1) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_1.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/1) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_1.sql)
 
 ---
 
@@ -62,7 +62,7 @@ arrayExists(
 )
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/2) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_2.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/2) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_2.sql)
 
 ---
 
@@ -89,7 +89,7 @@ arrayFold(
 
 2. **[`ngrams`](https://clickhouse.com/docs/en/sql-reference/functions/string-functions#ngrams)**: To process the string of digits as an array, we used `ngrams(string, 1)`. While typically used for text analysis, here it served as a convenient way to split a string into an array of single characters, which we then cast to integers for the `arrayFold` operation.
 
-[View full puzzle description](https://adventofcode.com/2025/day/3) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_3.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/3) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_3.sql)
 
 ---
 
@@ -117,7 +117,7 @@ WITH RECURSIVE recursive_convergence AS (
 
 2. **[`argMin`](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference/argmin)**: To find the exact moment the simulation stabilized, we tracked the point count at every depth of the recursion. We used `argMin(point_count, depth)` to retrieve the count of remaining points exactly at the minimum depth where the count stopped changing.
 
-[View full puzzle description](https://adventofcode.com/2025/day/4) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_4.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/4) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_4.sql)
 
 ---
 
@@ -140,7 +140,7 @@ SELECT intervalLengthSum(range_tuple.1, range_tuple.2) AS solution
 
 2. **[`arrayExists`](https://clickhouse.com/docs/en/sql-reference/functions/higher-order-functions#arrayexists)**: For Part 1, we used `arrayExists` to check if a specific ID fell within *any* of the valid ranges in the array. This allowed us to perform the check efficiently without exploding the ranges into billions of individual rows.
 
-[View full puzzle description](https://adventofcode.com/2025/day/5) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_5.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/5) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_5.sql)
 
 ---
 
@@ -167,7 +167,7 @@ toInt64(arrayProduct(
 
 3. **[`arraySplit`](https://clickhouse.com/docs/en/sql-reference/functions/array-functions#arraysplit)**: For Part 2, after extracting the raw digits, we needed to group them into valid expressions. We used `arraySplit` to break the large array into chunks whenever we encountered an operator column, effectively separating the mathematical problems.
 
-[View full puzzle description](https://adventofcode.com/2025/day/6) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_6.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/6) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_6.sql)
 
 ---
 
@@ -190,7 +190,7 @@ toInt64(arrayProduct(
 arrayReduce('sumMap', arrayMap(position -> map(...), ...))
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/7) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_7.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/7) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_7.sql)
 
 ---
 
@@ -213,7 +213,7 @@ arrayReduce('sumMap', arrayMap(position -> map(...), ...))
 runningAccumulate(points_state) AS unique_points_seen
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/8) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_8.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/8) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_8.sql)
 
 ---
 
@@ -238,7 +238,7 @@ runningAccumulate(points_state) AS unique_points_seen
 polygonsWithinCartesian(test_bounds, all_points_ring)
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/9) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_9.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/9) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_9.sql)
 
 ---
 
@@ -261,7 +261,7 @@ polygonsWithinCartesian(test_bounds, all_points_ring)
 ARRAY JOIN range(0, toUInt32(pow(2, num_buttons)))
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/10) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_10.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/10) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_10.sql)
 
 ---
 
@@ -288,7 +288,7 @@ cityHash64('svr') AS svr_node
 paths.visited_dac OR (edges.to_node = kn.dac_node) AS visited_dac
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/11) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_11.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/11) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_11.sql)
 
 ---
 
@@ -312,4 +312,4 @@ arraySum(
 )
 ```
 
-[View full puzzle description](https://adventofcode.com/2025/day/12) | [View full SQL solution](https://github.com/ArctypeZach/ClickHouseAoC2025/blob/master/day_12.sql)
+[View full puzzle description](https://adventofcode.com/2025/day/12) | [View full SQL solution](https://github.com/ClickHouse/TreeHouse/blob/master/day_12.sql)
